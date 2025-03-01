@@ -234,8 +234,8 @@ github.com/gogo/protobuf v1.2.0/go.mod h1:r8qH/GZQm5c6nD/R0oafs1akxWv10x8SbQlK7a
 github.com/gogo/protobuf v1.2.1/go.mod h1:hp+jE20tsWTFYpLwKvXlhS1hjn+gTNwPg2I6zVXpSg4=
 github.com/gokrazy/internal v0.0.0-20250126213949-423a5b587b57 h1:f5bEvO4we3fbfiBkECrrUgWQ8OH6J3SdB2Dwxid/Yx4=
 github.com/gokrazy/internal v0.0.0-20250126213949-423a5b587b57/go.mod h1:SJG1KwuJQXFEoBgryaNCkMbdISyovDgZd0xmXJRZmiw=
-github.com/gokrazy/tools v0.0.0-20250128200151-63160424957c h1:iEbS8GrNOn671ze8J/AfrYFEVzf8qMx8aR5K0VxPK2w=
-github.com/gokrazy/tools v0.0.0-20250128200151-63160424957c/go.mod h1:f2vZhnaPzy92+Bjpx1iuZHK7VuaJx6SNCWQWmu23HZA=
+github.com/gokrazy/tools v0.0.0-20250212161915-30b9fe0c81f8 h1:JS8xlGmF5UXVzZV9Sc1GX5B5jNIe6YvKYa7KQCCS5Zs=
+github.com/gokrazy/tools v0.0.0-20250212161915-30b9fe0c81f8/go.mod h1:c8f1EjCxMYk5IiEkBFb5d+WiPXWgqc1yPnAl4nlKyJM=
 github.com/gokrazy/updater v0.0.0-20240113102150-4ac511a17e33 h1:m6NVAznErzAL9fzaIh+HeFbbImxV6ku4iaUUHhYctmg=
 github.com/gokrazy/updater v0.0.0-20240113102150-4ac511a17e33/go.mod h1:PYOvzGOL4nlBmuxu7IyKQTFLaxr61+WPRNRzVtuYOHw=
 github.com/golang-jwt/jwt/v5 v5.2.1 h1:OuVbFODueb089Lh128TAcimifWaLhJwVflnrgM17wHk=
@@ -329,8 +329,8 @@ github.com/hashicorp/logutils v1.0.0/go.mod h1:QIAnNjmIWmVIIkWDTG1z5v++HQmx9WQRO
 github.com/hashicorp/mdns v1.0.0/go.mod h1:tL+uN++7HEJ6SQLQ2/p+z2pH24WQKWjBPkE0mNTz8vQ=
 github.com/hashicorp/memberlist v0.1.3/go.mod h1:ajVTdAv/9Im8oMAAj5G31PhhMCZJV2pPBoIllUwCN7I=
 github.com/hashicorp/serf v0.8.2/go.mod h1:6hOLApaqBFA1NXqRQAsxw9QxuDEvNxSQRwA/JwenrHc=
-github.com/hasura/go-graphql-client v0.13.2-0.20250210080311-cf325bddb83b h1:TNn5zg7P6l9aCDjdlT+ryc35fmDbK888O7F4TTs/pFQ=
-github.com/hasura/go-graphql-client v0.13.2-0.20250210080311-cf325bddb83b/go.mod h1:k7FF7h53C+hSNFRG3++DdVZWIuHdCaTbI7siTJ//zGQ=
+github.com/hasura/go-graphql-client v0.13.2-0.20250219070609-5970b87363a3 h1:DsBHMwn8AqZRx/aChi3sSLriBKRnSlaWb28fY9QVzJ8=
+github.com/hasura/go-graphql-client v0.13.2-0.20250219070609-5970b87363a3/go.mod h1:k7FF7h53C+hSNFRG3++DdVZWIuHdCaTbI7siTJ//zGQ=
 github.com/hinshun/vt10x v0.0.0-20220119200601-820417d04eec h1:qv2VnGeEQHchGaZ/u7lxST/RaJw+cv273q79D81Xbog=
 github.com/hinshun/vt10x v0.0.0-20220119200601-820417d04eec/go.mod h1:Q48J4R4DvxnHolD5P8pOtXigYlRuPLGl6moFx3ulM68=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
@@ -357,8 +357,6 @@ github.com/jarcoal/httpmock v1.3.0 h1:2RJ8GP0IIaWwcC9Fp2BmVi8Kog3v2Hn7VXM3fTd+nu
 github.com/jarcoal/httpmock v1.3.0/go.mod h1:3yb8rc4BI7TCBhFY8ng0gjuLKJNquuDNiPaZjnENuYg=
 github.com/jeremywohl/flatten v1.0.1 h1:LrsxmB3hfwJuE+ptGOijix1PIfOoKLJ3Uee/mzbgtrs=
 github.com/jeremywohl/flatten v1.0.1/go.mod h1:4AmD/VxjWcI5SRB0n6szE2A6s2fsNHDLO0nAlMHgfLQ=
-github.com/jinzhu/copier v0.4.0 h1:w3ciUoD19shMCRargcpm0cm91ytaBhDvuRpz1ODO/U8=
-github.com/jinzhu/copier v0.4.0/go.mod h1:DfbEm0FYsaqBcKcFuvmOZb218JkPGtvSHsKg8S8hyyg=
 github.com/jinzhu/inflection v1.0.0 h1:K317FqzuhWc8YvSVlFMCCUb36O/S9MCKRDI7QkRKD/E=
 github.com/jinzhu/inflection v1.0.0/go.mod h1:h+uFLlag+Qp1Va5pdKtLDYj+kHp5pxUVkryuEj+Srlc=
 github.com/jinzhu/now v1.1.5 h1:/o9tlHleP7gOFmsnYNz3RGnqzefHA47wQpKrrdTIwXQ=
