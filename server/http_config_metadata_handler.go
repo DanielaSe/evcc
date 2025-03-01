@@ -9,16 +9,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var supportedLanguages = []string{"en", "de"}
-
-func getLang(r *http.Request) string {
-	lang := r.URL.Query().Get("lang")
-	if !slices.Contains(supportedLanguages, lang) {
-		lang = supportedLanguages[0]
-	}
-	return lang
-}
-
 // templatesHandler returns the list of templates by class
 func templatesHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -29,7 +19,7 @@ func templatesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lang := getLang(r)
+	lang := r.URL.Query().Get("lang")
 	templates.EncoderLanguage(lang)
 
 	if name := r.URL.Query().Get("name"); name != "" {
@@ -70,7 +60,7 @@ func productsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tmpl := templates.ByClass(class)
-	lang := getLang(r)
+	lang := r.URL.Query().Get("lang")
 	usage := r.URL.Query().Get("usage")
 
 	res := make(products, 0)

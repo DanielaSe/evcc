@@ -136,9 +136,9 @@ func (t *Planner) continuousPlan(rates api.Rates, start, end time.Time) api.Rate
 	return res
 }
 
-func (t *Planner) Plan(requiredDuration time.Duration, targetTime time.Time) api.Rates {
+func (t *Planner) Plan(requiredDuration time.Duration, targetTime time.Time) (api.Rates, error) {
 	if t == nil || requiredDuration <= 0 {
-		return nil
+		return nil, nil
 	}
 
 	latestStart := targetTime.Add(-requiredDuration)
@@ -157,19 +157,19 @@ func (t *Planner) Plan(requiredDuration time.Duration, targetTime time.Time) api
 
 	// target charging without tariff or late start
 	if t.tariff == nil {
-		return simplePlan
+		return simplePlan, nil
 	}
 
 	rates, err := t.tariff.Rates()
 
 	// treat like normal target charging if we don't have rates
 	if len(rates) == 0 || err != nil {
-		return simplePlan
+		return simplePlan, err
 	}
 
 	// consume remaining time
 	if t.clock.Until(targetTime) <= requiredDuration {
-		return t.continuousPlan(rates, latestStart, targetTime)
+		return t.continuousPlan(rates, latestStart, targetTime), nil
 	}
 
 	// rates are by default sorted by date, oldest to newest
@@ -183,7 +183,7 @@ func (t *Planner) Plan(requiredDuration time.Duration, targetTime time.Time) api
 		// there is enough time for charging after end of current rates
 		durationAfterRates := targetTime.Sub(last)
 		if durationAfterRates >= requiredDuration {
-			return nil
+			return nil, nil
 		}
 
 		// need to use some of the available slots
@@ -199,5 +199,5 @@ func (t *Planner) Plan(requiredDuration time.Duration, targetTime time.Time) api
 	// sort plan by time
 	plan.Sort()
 
-	return plan
+	return plan, nil
 }

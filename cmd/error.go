@@ -81,7 +81,8 @@ func (e ClassError) MarshalJSON() ([]byte, error) {
 		Error: e.err.Error(),
 	}
 
-	if de := new(DeviceError); errors.As(e.err, &de) {
+	var de *DeviceError
+	if errors.As(e.err, &de) {
 		res.Device = de.Name
 	}
 

@@ -5,7 +5,6 @@
 		:description="$t('config.circuits.description')"
 		docs="/docs/features/loadmanagement"
 		:defaultYaml="defaultYaml"
-		removeKey="circuits"
 		endpoint="/config/circuits"
 		@changed="$emit('changed')"
 	/>

@@ -132,7 +132,7 @@ var _ api.VehicleClimater = (*Provider)(nil)
 func (v *Provider) Climater() (bool, error) {
 	res, err := v.statusG()
 	if err == nil {
-		active := strings.ToLower(res.Preconditionning.AirConditioning.Status) == "enabled"
+		active := strings.ToLower(res.Preconditionning.AirConditioning.Status) != "disabled"
 		return active, nil
 	}
 

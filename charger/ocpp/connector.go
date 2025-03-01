@@ -1,7 +1,6 @@
 package ocpp
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -101,21 +100,15 @@ func (conn *Connector) GetScheduleLimit(duration int) (float64, error) {
 
 // WatchDog triggers meter values messages if older than timeout.
 // Must be wrapped in a goroutine.
-func (conn *Connector) WatchDog(ctx context.Context, timeout time.Duration) {
+func (conn *Connector) WatchDog(timeout time.Duration) {
 	tick := time.NewTicker(2 * time.Second)
-	for {
+	for ; true; <-tick.C {
 		conn.mu.Lock()
 		update := conn.clock.Since(conn.meterUpdated) > timeout
 		conn.mu.Unlock()
 
-		if update {
+		if update && conn.cp.HasRemoteTriggerFeature {
 			conn.TriggerMessageRequest(core.MeterValuesFeatureName)
-		}
-
-		select {
-		case <-ctx.Done():
-			return
-		case <-tick.C:
 		}
 	}
 }

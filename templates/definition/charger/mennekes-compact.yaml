@@ -3,10 +3,10 @@ covers: ["mennekes"]
 products:
   - brand: Mennekes
     description:
-      generic: AMTRON Compact 2.0s
+      generic: Amtron Compact 2.0s
   - brand: Mennekes
     description:
-      generic: AMTRON 4You 310
+      generic: Amtron Start 2.0s
   - brand: Kostal
     description:
       generic: Enector

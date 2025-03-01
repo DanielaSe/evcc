@@ -1,6 +1,6 @@
 module github.com/evcc-io/evcc
 
-go 1.24.0
+go 1.24
 
 require (
 	dario.cat/mergo v1.0.1
@@ -48,11 +48,12 @@ require (
 	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79
 	github.com/grid-x/modbus v0.0.0-20241004123532-f6c6fb5201b3
 	github.com/hashicorp/go-version v1.7.0
-	github.com/hasura/go-graphql-client v0.13.2-0.20250219070609-5970b87363a3
+	github.com/hasura/go-graphql-client v0.13.2-0.20250210080311-cf325bddb83b
 	github.com/influxdata/influxdb-client-go/v2 v2.14.0
 	github.com/insomniacslk/tapo v1.0.1
 	github.com/itchyny/gojq v0.12.17
 	github.com/jeremywohl/flatten v1.0.1
+	github.com/jinzhu/copier v0.4.0
 	github.com/jinzhu/now v1.1.5
 	github.com/joeshaw/carwings v0.0.0-20250124122309-e366d592915c
 	github.com/joho/godotenv v1.5.1
@@ -140,7 +141,7 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/gokrazy/internal v0.0.0-20250126213949-423a5b587b57 // indirect
-	github.com/gokrazy/tools v0.0.0-20250212161915-30b9fe0c81f8 // indirect
+	github.com/gokrazy/tools v0.0.0-20250128200151-63160424957c // indirect
 	github.com/golanguzb70/lrucache v1.2.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/renameio/v2 v2.0.0 // indirect

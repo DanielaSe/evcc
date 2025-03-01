@@ -61,7 +61,7 @@
 import GenericModal from "./GenericModal.vue";
 import Modal from "bootstrap/js/dist/modal";
 import api from "../api";
-import { updateAuthStatus, getAndClearNextUrl, getAndClearNextModal, isLoggedIn } from "../auth";
+import { updateAuthStatus, getAndClearNextUrl, isLoggedIn } from "../auth";
 import { docsPrefix } from "../i18n";
 
 export default {
@@ -119,10 +119,8 @@ export default {
 					await updateAuthStatus();
 					if (isLoggedIn()) {
 						this.closeModal();
-						const url = getAndClearNextUrl();
-						if (url) this.$router.push(url);
-						const modal = getAndClearNextModal();
-						if (modal) modal.show();
+						const target = getAndClearNextUrl();
+						if (target) this.$router.push(target);
 						this.password = "";
 					} else {
 						// login successful but auth cookie doesnt work

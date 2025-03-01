@@ -20,7 +20,8 @@ func wait(err error, rc chan error) error {
 			close(rc)
 		}
 
-		if oe := new(ocpp.Error); errors.As(err, &oe) && oe.Code == ocppj.GenericError {
+		oe := new(ocpp.Error)
+		if errors.As(err, &oe) && oe.Code == ocppj.GenericError {
 			err = api.ErrTimeout
 		}
 	}

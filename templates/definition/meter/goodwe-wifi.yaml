@@ -1,6 +1,5 @@
 template: goodwe-wifi
-# UDP implementation is broken
-# deprecated: true
+deprecated: true
 products:
   - brand: GoodWe
     description:

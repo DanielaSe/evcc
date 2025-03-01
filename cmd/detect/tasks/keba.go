@@ -72,7 +72,7 @@ func (h *KEBAHandler) Test(log *util.Logger, in ResultDetails) []ResultDetails {
 				continue
 			}
 
-			out := in
+			out := in.Clone()
 			out.KebaResult = &KebaResult{
 				Addr:   t.Addr,
 				Serial: t.Report.Serial,

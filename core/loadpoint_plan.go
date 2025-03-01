@@ -79,9 +79,9 @@ func (lp *Loadpoint) GetPlanGoal() (float64, bool) {
 }
 
 // GetPlan creates a charging plan for given time and duration
-func (lp *Loadpoint) GetPlan(targetTime time.Time, requiredDuration time.Duration) api.Rates {
+func (lp *Loadpoint) GetPlan(targetTime time.Time, requiredDuration time.Duration) (api.Rates, error) {
 	if lp.planner == nil || targetTime.IsZero() {
-		return nil
+		return nil, nil
 	}
 
 	return lp.planner.Plan(requiredDuration, targetTime)
@@ -132,8 +132,9 @@ func (lp *Loadpoint) plannerActive() (active bool) {
 		return false
 	}
 
-	plan := lp.GetPlan(planTime, requiredDuration)
-	if plan == nil {
+	plan, err := lp.GetPlan(planTime, requiredDuration)
+	if err != nil {
+		lp.log.ERROR.Println("planner:", err)
 		return false
 	}
 

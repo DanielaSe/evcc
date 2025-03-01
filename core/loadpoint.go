@@ -241,14 +241,6 @@ func NewLoadpointFromConfig(log *util.Logger, settings settings.Settings, other 
 		lp.mode = api.ModeOff
 	}
 
-	if lp.Title != "" {
-		lp.setTitle(lp.Title)
-	}
-
-	if lp.Priority > 0 {
-		lp.setPriority(lp.Priority)
-	}
-
 	return lp, nil
 }
 
@@ -288,6 +280,14 @@ func (lp *Loadpoint) restoreSettings() {
 		return
 	}
 
+	// from yaml
+	if lp.Title != "" {
+		lp.setTitle(lp.Title)
+	}
+	if lp.Priority > 0 {
+		lp.setPriority(lp.Priority)
+	}
+
 	// deprecated yaml properties
 	if lp.Phases_ > 0 {
 		lp.log.WARN.Printf("ignoring deprecated phases: %d. please configure via UI", lp.Phases_)
@@ -303,7 +303,7 @@ func (lp *Loadpoint) restoreSettings() {
 	}
 
 	// restore runtime configuration (database & yaml LPs)
-	if v, err := lp.settings.String(keys.Mode); err == nil && v != "" && lp.DefaultMode == api.ModeEmpty {
+	if v, err := lp.settings.String(keys.Mode); err == nil && v != "" {
 		lp.setMode(api.ChargeMode(v))
 	}
 	if v, err := lp.settings.Int(keys.Priority); err == nil && v > 0 {
@@ -445,6 +445,9 @@ func (lp *Loadpoint) evChargeStartHandler() {
 func (lp *Loadpoint) evChargeStopHandler() {
 	lp.log.INFO.Println("stop charging <-")
 	lp.pushEvent(evChargeStop)
+	if lp.enabled {
+		lp.startWakeUpTimer()
+	}
 
 	// soc update reset
 	util.ResetCached()
@@ -1847,8 +1850,8 @@ func (lp *Loadpoint) Update(sitePower, batteryBoostPower float64, rates api.Rate
 
 	case mode == api.ModeMinPV || mode == api.ModePV:
 		// cheap tariff
+		rate, _ := rates.Current(time.Now())
 		if smartCostActive {
-			rate, _ := rates.At(time.Now())
 			lp.log.DEBUG.Printf("smart cost active: %.2f", rate.Price)
 			err = lp.fastCharging()
 			lp.resetPhaseTimer()

@@ -224,7 +224,8 @@ func (v *Tronity) post(uri string) error {
 	}
 
 	// ignore HTTP 405
-	if se := new(request.StatusError); errors.As(err, &se) && se.StatusCode() == http.StatusMethodNotAllowed {
+	var se request.StatusError
+	if errors.As(err, &se) && se.StatusCode() == http.StatusMethodNotAllowed {
 		err = nil
 	}
 

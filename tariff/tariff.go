@@ -72,7 +72,7 @@ func NewConfigurableFromConfig(ctx context.Context, other map[string]interface{}
 		embed:  &cc.embed,
 		typ:    cc.Type,
 		priceG: priceG,
-		data:   util.NewMonitor[api.Rates](2 * cc.Interval),
+		data:   util.NewMonitor[api.Rates](2 * time.Hour),
 	}
 
 	if forecastG != nil {
@@ -112,13 +112,7 @@ func (t *Tariff) run(forecastG func() (string, error), done chan error, interval
 			continue
 		}
 
-		// only prune rates older than current period
-		periodStart := now.With(time.Now()).BeginningOfHour()
-		if t.typ == api.TariffTypeSolar {
-			periodStart = BeginningOfDay()
-		}
-		mergeRatesAfter(t.data, data, periodStart)
-
+		mergeRates(t.data, data)
 		once.Do(func() { close(done) })
 	}
 }

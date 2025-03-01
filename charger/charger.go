@@ -6,8 +6,7 @@ import (
 	"fmt"
 
 	"github.com/evcc-io/evcc/api"
-	"github.com/evcc-io/evcc/charger/measurement"
-	meter "github.com/evcc-io/evcc/meter/measurement"
+	"github.com/evcc-io/evcc/meter"
 	"github.com/evcc-io/evcc/plugin"
 	"github.com/evcc-io/evcc/util"
 )
@@ -37,8 +36,12 @@ func NewConfigurableFromConfig(ctx context.Context, other map[string]interface{}
 		Wakeup                              *plugin.Config
 		Soc                                 *plugin.Config
 		Tos                                 bool
-		measurement.Energy                  `mapstructure:",squash"` // optional
-		meter.Phases                        `mapstructure:",squash"` // optional
+
+		// optional measurements
+		Power  *plugin.Config
+		Energy *plugin.Config
+
+		Currents, Voltages []plugin.Config
 	}
 
 	if err := util.DecodeOther(other, &cc); err != nil {
@@ -120,12 +123,12 @@ func NewConfigurableFromConfig(ctx context.Context, other map[string]interface{}
 	}
 
 	// decorate measurements
-	powerG, energyG, err := cc.Energy.Configure(ctx)
+	powerG, energyG, err := meter.BuildMeasurements(ctx, cc.Power, cc.Energy)
 	if err != nil {
 		return nil, err
 	}
 
-	currentsG, voltagesG, _, err := cc.Phases.Configure(ctx)
+	currentsG, voltagesG, _, err := meter.BuildPhaseMeasurements(ctx, cc.Currents, cc.Voltages, nil)
 	if err != nil {
 		return nil, err
 	}

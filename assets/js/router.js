@@ -62,11 +62,6 @@ export default function setupRouter(i18n) {
         },
       },
       {
-        path: "/energy",
-        component: () => import("./views/Energy.vue"),
-        props: true,
-      },
-      {
         path: "/log",
         component: () => import("./views/Log.vue"),
         beforeEnter: ensureAuth,

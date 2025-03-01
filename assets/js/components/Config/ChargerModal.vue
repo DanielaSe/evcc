@@ -55,7 +55,12 @@
 				:label="$t('config.charger.ocppLabel')"
 				:help="$t('config.charger.ocppHelp')"
 			>
-				<input type="text" class="form-control border" :value="ocppUrl" readonly />
+				<input
+					type="text"
+					class="form-control border border-success bg-transparent"
+					:value="ocppUrl"
+					readonly
+				/>
 			</FormRow>
 
 			<Modbus

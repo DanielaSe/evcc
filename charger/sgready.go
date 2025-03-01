@@ -20,9 +20,9 @@ package charger
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/evcc-io/evcc/api"
-	"github.com/evcc-io/evcc/charger/measurement"
 	"github.com/evcc-io/evcc/plugin"
 	"github.com/evcc-io/evcc/util"
 )
@@ -30,9 +30,11 @@ import (
 // SgReady charger implementation
 type SgReady struct {
 	*embed
-	mode  int64
-	modeS func(int64) error
-	modeG func() (int64, error)
+	_mode    int64
+	phases   int
+	get      func() (int64, error)
+	set      func(int64) error
+	maxPower func(int64) error
 }
 
 func init() {
@@ -51,12 +53,15 @@ const (
 // NewSgReadyFromConfig creates an SG Ready configurable charger from generic config
 func NewSgReadyFromConfig(ctx context.Context, other map[string]interface{}) (api.Charger, error) {
 	cc := struct {
-		embed                   `mapstructure:",squash"`
-		SetMode                 plugin.Config
-		GetMode                 *plugin.Config // optional
-		measurement.Temperature `mapstructure:",squash"`
-		measurement.Energy      `mapstructure:",squash"`
-		Phases                  int
+		embed     `mapstructure:",squash"`
+		SetMode   plugin.Config
+		GetMode   *plugin.Config // optional
+		MaxPower  *plugin.Config // optional
+		Power     *plugin.Config // optional
+		Energy    *plugin.Config // optional
+		Temp      *plugin.Config // optional
+		LimitTemp *plugin.Config // optional
+		Phases    int
 	}{
 		embed: embed{
 			Icon_:     "heatpump",
@@ -69,56 +74,76 @@ func NewSgReadyFromConfig(ctx context.Context, other map[string]interface{}) (ap
 		return nil, err
 	}
 
-	modeS, err := cc.SetMode.IntSetter(ctx, "mode")
+	set, err := cc.SetMode.IntSetter(ctx, "mode")
 	if err != nil {
 		return nil, err
 	}
 
-	modeG, err := cc.GetMode.IntGetter(ctx)
+	get, err := cc.GetMode.IntGetter(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := NewSgReady(ctx, &cc.embed, modeS, modeG)
+	maxPower, err := cc.MaxPower.IntSetter(ctx, "maxpower")
 	if err != nil {
 		return nil, err
 	}
 
-	powerG, energyG, err := cc.Energy.Configure(ctx)
+	res, err := NewSgReady(ctx, &cc.embed, set, get, maxPower, cc.Phases)
 	if err != nil {
 		return nil, err
 	}
 
-	tempG, limitTempG, err := cc.Temperature.Configure(ctx)
+	// decorate power
+	powerG, err := cc.Power.FloatGetter(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("power: %w", err)
+	}
+
+	// decorate energy
+	energyG, err := cc.Energy.FloatGetter(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("energy: %w", err)
+	}
+
+	// decorate temp
+	tempG, err := cc.Temp.FloatGetter(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("temp: %w", err)
+	}
+
+	limitTempG, err := cc.LimitTemp.IntGetter(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("limit temp: %w", err)
 	}
 
 	return decorateSgReady(res, powerG, energyG, tempG, limitTempG), nil
 }
 
 // NewSgReady creates SG Ready charger
-func NewSgReady(ctx context.Context, embed *embed, modeS func(int64) error, modeG func() (int64, error)) (*SgReady, error) {
+func NewSgReady(ctx context.Context, embed *embed, set func(int64) error, get func() (int64, error), maxPower func(int64) error, phases int) (*SgReady, error) {
 	res := &SgReady{
-		embed: embed,
-		mode:  Normal,
-		modeS: modeS,
-		modeG: modeG,
+		embed:    embed,
+		_mode:    Normal,
+		set:      set,
+		get:      get,
+		maxPower: maxPower,
+		phases:   phases,
 	}
 
 	return res, nil
 }
 
-func (wb *SgReady) getMode() (int64, error) {
-	if wb.modeG == nil {
-		return wb.mode, nil
+func (wb *SgReady) mode() (int64, error) {
+	if wb.get == nil {
+		return wb._mode, nil
 	}
-	return wb.modeG()
+	return wb.get()
 }
 
 // Status implements the api.Charger interface
 func (wb *SgReady) Status() (api.ChargeStatus, error) {
-	mode, err := wb.getMode()
+	mode, err := wb.mode()
 	if err != nil {
 		return api.StatusNone, err
 	}
@@ -127,27 +152,36 @@ func (wb *SgReady) Status() (api.ChargeStatus, error) {
 		return api.StatusNone, errors.New("stop mode")
 	}
 
-	status := map[int64]api.ChargeStatus{Boost: api.StatusC, Normal: api.StatusB}
-	return status[mode], nil
+	status := map[int64]api.ChargeStatus{Boost: api.StatusC, Normal: api.StatusB}[mode]
+	return status, nil
 }
 
 // Enabled implements the api.Charger interface
 func (wb *SgReady) Enabled() (bool, error) {
-	mode, err := wb.getMode()
+	mode, err := wb.mode()
 	return mode == Boost, err
 }
 
 // Enable implements the api.Charger interface
 func (wb *SgReady) Enable(enable bool) error {
 	mode := map[bool]int64{false: Normal, true: Boost}[enable]
-	err := wb.modeS(mode)
+	err := wb.set(mode)
 	if err == nil {
-		wb.mode = mode
+		wb._mode = mode
 	}
 	return err
 }
 
 // MaxCurrent implements the api.Charger interface
 func (wb *SgReady) MaxCurrent(current int64) error {
-	return nil
+	return wb.MaxCurrentEx(float64(current))
+}
+
+// MaxCurrent implements the api.Charger interface
+func (wb *SgReady) MaxCurrentEx(current float64) error {
+	if wb.maxPower == nil {
+		return nil
+	}
+
+	return wb.maxPower(int64(230 * current * float64(wb.phases)))
 }

@@ -43,7 +43,7 @@
 					:help="
 						$t('config.sponsor.descriptionToken', { url: 'https://sponsor.evcc.io/' })
 					"
-					docs-link="/docs/sponsorship#trial"
+					docs-link="/docs/sponsorship"
 					class="mt-4"
 				>
 					<textarea
@@ -53,7 +53,6 @@
 						rows="5"
 						spellcheck="false"
 						class="form-control"
-						@paste="handlePaste"
 					/>
 				</FormRow>
 			</div>
@@ -68,7 +67,7 @@ import Sponsor, { VICTRON_DEVICE } from "../Sponsor.vue";
 import SponsorTokenExpires from "../SponsorTokenExpires.vue";
 import store from "../../store";
 import { docsPrefix } from "../../i18n";
-import { cleanYaml } from "../../utils/cleanYaml";
+
 export default {
 	name: "SponsorModal",
 	components: { FormRow, JsonModal, Sponsor, SponsorTokenExpires },
@@ -96,12 +95,6 @@ export default {
 	methods: {
 		transformReadValues() {
 			return { token: "" };
-		},
-		handlePaste(event) {
-			event.preventDefault();
-			const text = event.clipboardData.getData("text");
-			const cleaned = cleanYaml(text, "sponsortoken");
-			event.target.value = cleaned;
 		},
 	},
 };

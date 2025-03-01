@@ -236,22 +236,15 @@ var _ api.MeterEnergy = (*Smaevcharger)(nil)
 
 // TotalEnergy implements the api.MeterEnergy interface
 func (wb *Smaevcharger) TotalEnergy() (float64, error) {
-	res, err := wb.getMeasurement("Measurement.Metering.GridMs.TotWhIn")
-	if se := new(smaevcharger.ErrUnknownMeasurement); errors.As(err, &se) {
-		res, err = wb.getMeasurement("Measurement.Metering.GridMs.TotWhIn.ChaSta")
-	}
-	return res / 1e3, err
+	val, err := wb.getMeasurement("Measurement.Metering.GridMs.TotWhIn")
+	return val / 1e3, err
 }
 
 var _ api.Meter = (*Smaevcharger)(nil)
 
 // CurrentPower implements the api.Meter interface
 func (wb *Smaevcharger) CurrentPower() (float64, error) {
-	res, err := wb.getMeasurement("Measurement.Metering.GridMs.TotWIn")
-	if se := new(smaevcharger.ErrUnknownMeasurement); errors.As(err, &se) {
-		res, err = wb.getMeasurement("Measurement.Metering.GridMs.TotWIn.ChaSta")
-	}
-	return res, err
+	return wb.getMeasurement("Measurement.Metering.GridMs.TotWIn")
 }
 
 var _ api.ChargeRater = (*Smaevcharger)(nil)
@@ -259,9 +252,6 @@ var _ api.ChargeRater = (*Smaevcharger)(nil)
 // ChargedEnergy implements the api.ChargeRater interface
 func (wb *Smaevcharger) ChargedEnergy() (float64, error) {
 	res, err := wb.getMeasurement("Measurement.ChaSess.WhIn")
-	if se := new(smaevcharger.ErrUnknownMeasurement); errors.As(err, &se) {
-		res, err = wb.getMeasurement("Measurement.Metering.GridMs.TotWhIn.ChaSta")
-	}
 	return res / 1e3, err
 }
 
@@ -327,7 +317,7 @@ func (wb *Smaevcharger) getMeasurement(id string) (float64, error) {
 		}
 	}
 
-	return 0, &smaevcharger.ErrUnknownMeasurement{Measurement: id}
+	return 0, fmt.Errorf("unknown measurement: %s", id)
 }
 
 func (wb *Smaevcharger) getParameter(id string) (string, error) {

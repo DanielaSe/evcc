@@ -22,6 +22,6 @@ params:
       en: Only required if multiple contracts belong to the same user
 render: |
   type: ostrom
-  clientid: {{ .clientid }}
-  clientsecret: {{ .clientsecret }}
-  contract: {{ .contract }}
+  ClientId: {{ .clientid }}
+  ClientSecret: {{ .clientsecret }}
+  Contract: {{ .contract }}

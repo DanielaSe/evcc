@@ -18,9 +18,9 @@ import (
 
 type Solcast struct {
 	*request.Helper
-	log  *util.Logger
-	site string
-	data *util.Monitor[api.Rates]
+	log   *util.Logger
+	sites []string
+	data  *util.Monitor[api.Rates]
 }
 
 var _ api.Tariff = (*Solcast)(nil)
@@ -30,12 +30,9 @@ func init() {
 }
 
 func NewSolcastFromConfig(other map[string]interface{}) (api.Tariff, error) {
-	cc := struct {
-		Site     string
-		Token    string
-		Interval time.Duration
-	}{
-		Interval: 3 * time.Hour,
+	var cc struct {
+		Site  string
+		Token string
 	}
 
 	if err := util.DecodeOther(other, &cc); err != nil {
@@ -45,6 +42,10 @@ func NewSolcastFromConfig(other map[string]interface{}) (api.Tariff, error) {
 	if cc.Site == "" {
 		return nil, errors.New("missing site id")
 	}
+	// TODO multiple sites
+	// if len(cc.Site) > 1 {
+	// 	return nil, errors.New("multiple sites not supported (yet)")
+	// }
 
 	if cc.Token == "" {
 		return nil, errors.New("missing token")
@@ -54,30 +55,35 @@ func NewSolcastFromConfig(other map[string]interface{}) (api.Tariff, error) {
 
 	t := &Solcast{
 		log:    log,
-		site:   cc.Site,
+		sites:  []string{cc.Site},
 		Helper: request.NewHelper(log),
-		data:   util.NewMonitor[api.Rates](2 * cc.Interval),
+		data:   util.NewMonitor[api.Rates](2 * time.Hour),
 	}
 
 	t.Client.Transport = transport.BearerAuth(cc.Token, t.Client.Transport)
 
 	done := make(chan error)
-	go t.run(cc.Interval, done)
+	go t.run(done)
 	err := <-done
 
 	return t, err
 }
 
-func (t *Solcast) run(interval time.Duration, done chan error) {
+func (t *Solcast) run(done chan error) {
 	var once sync.Once
 
 	// don't exceed 10 requests per 24h
-	for ; true; <-time.Tick(interval) {
+	for ; true; <-time.Tick(time.Duration(3*len(t.sites)) * time.Hour) {
 		var res solcast.Forecasts
 
 		if err := backoff.Retry(func() error {
-			uri := fmt.Sprintf("https://api.solcast.com.au/rooftop_sites/%s/forecasts?period=PT60M&format=json", t.site)
-			return backoffPermanentError(t.GetJSON(uri, &res))
+			for _, site := range t.sites {
+				uri := fmt.Sprintf("https://api.solcast.com.au/rooftop_sites/%s/forecasts?period=PT60M&format=json", site)
+				if err := t.GetJSON(uri, &res); err != nil {
+					return err
+				}
+			}
+			return nil
 		}, bo()); err != nil {
 			once.Do(func() { done <- err })
 
@@ -108,7 +114,7 @@ func (t *Solcast) run(interval time.Duration, done chan error) {
 			data = append(data, rr)
 		}
 
-		mergeRatesAfter(t.data, data, BeginningOfDay())
+		mergeRates(t.data, data)
 		once.Do(func() { close(done) })
 	}
 }

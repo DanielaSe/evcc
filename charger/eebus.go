@@ -1,7 +1,6 @@
 package charger
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"slices"
@@ -50,11 +49,11 @@ type EEBus struct {
 }
 
 func init() {
-	registry.AddCtx("eebus", NewEEBusFromConfig)
+	registry.Add("eebus", NewEEBusFromConfig)
 }
 
 // NewEEBusFromConfig creates an EEBus charger from generic config
-func NewEEBusFromConfig(ctx context.Context, other map[string]interface{}) (api.Charger, error) {
+func NewEEBusFromConfig(other map[string]interface{}) (api.Charger, error) {
 	cc := struct {
 		Ski           string
 		Ip            string
@@ -69,13 +68,13 @@ func NewEEBusFromConfig(ctx context.Context, other map[string]interface{}) (api.
 		return nil, err
 	}
 
-	return NewEEBus(ctx, cc.Ski, cc.Ip, cc.Meter, cc.ChargedEnergy, cc.VasVW)
+	return NewEEBus(cc.Ski, cc.Ip, cc.Meter, cc.ChargedEnergy, cc.VasVW)
 }
 
 //go:generate go tool decorate -f decorateEEBus -b *EEBus -r api.Charger -t "api.Meter,CurrentPower,func() (float64, error)" -t "api.PhaseCurrents,Currents,func() (float64, float64, float64, error)" -t "api.ChargeRater,ChargedEnergy,func() (float64, error)"
 
 // NewEEBus creates EEBus charger
-func NewEEBus(ctx context.Context, ski, ip string, hasMeter, hasChargedEnergy, vasVW bool) (api.Charger, error) {
+func NewEEBus(ski, ip string, hasMeter, hasChargedEnergy, vasVW bool) (api.Charger, error) {
 	if eebus.Instance == nil {
 		return nil, errors.New("eebus not configured")
 	}
@@ -94,7 +93,7 @@ func NewEEBus(ctx context.Context, ski, ip string, hasMeter, hasChargedEnergy, v
 		return nil, err
 	}
 
-	if err := c.Wait(ctx); err != nil {
+	if err := c.Wait(90 * time.Second); err != nil {
 		return c, err
 	}
 

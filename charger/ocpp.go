@@ -19,7 +19,6 @@ package charger
 
 import (
 	"cmp"
-	"context"
 	"fmt"
 	"math"
 	"slices"
@@ -51,11 +50,11 @@ type OCPP struct {
 const defaultIdTag = "evcc" // RemoteStartTransaction only
 
 func init() {
-	registry.AddCtx("ocpp", NewOCPPFromConfig)
+	registry.Add("ocpp", NewOCPPFromConfig)
 }
 
 // NewOCPPFromConfig creates a OCPP charger from generic config
-func NewOCPPFromConfig(ctx context.Context, other map[string]interface{}) (api.Charger, error) {
+func NewOCPPFromConfig(other map[string]interface{}) (api.Charger, error) {
 	cc := struct {
 		StationId      string
 		IdTag          string
@@ -71,6 +70,7 @@ func NewOCPPFromConfig(ctx context.Context, other map[string]interface{}) (api.C
 		AutoStart        bool                       // TODO deprecated
 		NoStop           bool                       // TODO deprecated
 
+		ForceWattCtrl  bool
 		StackLevelZero *bool
 		RemoteStart    bool
 	}{
@@ -85,10 +85,9 @@ func NewOCPPFromConfig(ctx context.Context, other map[string]interface{}) (api.C
 
 	stackLevelZero := cc.StackLevelZero != nil && *cc.StackLevelZero
 
-	c, err := NewOCPP(ctx,
-		cc.StationId, cc.Connector, cc.IdTag,
+	c, err := NewOCPP(cc.StationId, cc.Connector, cc.IdTag,
 		cc.MeterValues, cc.MeterInterval,
-		stackLevelZero, cc.RemoteStart,
+		cc.ForceWattCtrl, stackLevelZero, cc.RemoteStart,
 		cc.ConnectTimeout)
 	if err != nil {
 		return c, err
@@ -139,10 +138,9 @@ func NewOCPPFromConfig(ctx context.Context, other map[string]interface{}) (api.C
 //go:generate go tool decorate -f decorateOCPP -b *OCPP -r api.Charger -t "api.Meter,CurrentPower,func() (float64, error)" -t "api.MeterEnergy,TotalEnergy,func() (float64, error)" -t "api.PhaseCurrents,Currents,func() (float64, float64, float64, error)" -t "api.PhaseVoltages,Voltages,func() (float64, float64, float64, error)" -t "api.CurrentGetter,GetMaxCurrent,func() (float64, error)" -t "api.PhaseSwitcher,Phases1p3p,func(int) error" -t "api.Battery,Soc,func() (float64, error)"
 
 // NewOCPP creates OCPP charger
-func NewOCPP(ctx context.Context,
-	id string, connector int, idTag string,
+func NewOCPP(id string, connector int, idTag string,
 	meterValues string, meterInterval time.Duration,
-	stackLevelZero, remoteStart bool,
+	forceWattCtrl bool, stackLevelZero, remoteStart bool,
 	connectTimeout time.Duration,
 ) (*OCPP, error) {
 	log := util.NewLogger(fmt.Sprintf("%s-%d", lo.CoalesceOrEmpty(id, "ocpp"), connector))
@@ -157,14 +155,12 @@ func NewOCPP(ctx context.Context,
 			log.DEBUG.Printf("waiting for chargepoint: %v", connectTimeout)
 
 			select {
-			case <-ctx.Done():
-				return ctx.Err()
 			case <-time.After(connectTimeout):
 				return api.ErrTimeout
 			case <-cp.HasConnected():
 			}
 
-			return cp.Setup(ctx, meterValues, meterInterval)
+			return cp.Setup(meterValues, meterInterval, forceWattCtrl)
 		},
 	)
 	if err != nil {
@@ -193,9 +189,7 @@ func NewOCPP(ctx context.Context,
 		stackLevelZero: stackLevelZero,
 	}
 
-	if cp.HasRemoteTriggerFeature {
-		go conn.WatchDog(ctx, 10*time.Second)
-	}
+	go conn.WatchDog(10 * time.Second)
 
 	return c, conn.Initialized()
 }

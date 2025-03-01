@@ -13,19 +13,12 @@
 				<div
 					ref="details"
 					class="fw-normal"
-					:class="{
-						'text-decoration-underline': detailsClickable,
-						'evcc-gray': detailsInactive,
-					}"
+					:class="{ 'text-decoration-underline': detailsClickable }"
 					data-testid="energyflow-entry-details"
 					data-bs-toggle="tooltip"
 					:tabindex="detailsClickable ? 0 : undefined"
 					@click="detailsClicked"
 				>
-					<ForecastIcon
-						v-if="detailsIcon === 'forecast'"
-						class="ms-2 me-1 d-inline-block"
-					/>
 					<AnimatedNumber v-if="!isNaN(details)" :to="details" :format="detailsFmt" />
 				</div>
 				<div ref="power" class="power" data-bs-toggle="tooltip" @click="powerClicked">
@@ -48,11 +41,10 @@ import BatteryIcon from "./BatteryIcon.vue";
 import formatter from "../../mixins/formatter";
 import AnimatedNumber from "../AnimatedNumber.vue";
 import VehicleIcon from "../VehicleIcon";
-import ForecastIcon from "../MaterialIcon/Forecast.vue";
 
 export default {
 	name: "EnergyflowEntry",
-	components: { BatteryIcon, AnimatedNumber, VehicleIcon, ForecastIcon },
+	components: { BatteryIcon, AnimatedNumber, VehicleIcon },
 	mixins: [formatter],
 	props: {
 		name: { type: String },
@@ -62,11 +54,9 @@ export default {
 		powerTooltip: { type: Array },
 		powerUnit: { type: String },
 		details: { type: Number },
-		detailsIcon: { type: String },
 		detailsFmt: { type: Function },
 		detailsTooltip: { type: Array },
 		detailsClickable: { type: Boolean },
-		detailsInactive: { type: Boolean },
 	},
 	emits: ["details-clicked"],
 	data() {
@@ -117,6 +107,9 @@ export default {
 			);
 		},
 		updateDetailsTooltip() {
+			if (this.detailsClickable) {
+				return;
+			}
 			this.detailsTooltipInstance = this.updateTooltip(
 				this.detailsTooltipInstance,
 				this.detailsTooltip,
@@ -150,8 +143,6 @@ export default {
 			if (this.detailsClickable) {
 				this.$emit("details-clicked");
 			}
-			// hide tooltip, chrome needs a timeout
-			setTimeout(() => this.detailsTooltipInstance?.hide(), 10);
 		},
 	},
 };

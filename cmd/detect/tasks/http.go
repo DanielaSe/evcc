@@ -127,7 +127,11 @@ func (h *HttpHandler) Test(log *util.Logger, in ResultDetails) []ResultDetails {
 		}
 	}
 
-	out := in
-	out.Port = port
-	return []ResultDetails{out}
+	if err == nil {
+		out := in.Clone()
+		out.Port = port
+		return []ResultDetails{out}
+	}
+
+	return nil
 }

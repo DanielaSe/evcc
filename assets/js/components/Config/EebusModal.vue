@@ -5,7 +5,6 @@
 		:description="$t('config.eebus.description')"
 		docs="/docs/reference/configuration/eebus"
 		:defaultYaml="defaultYaml"
-		removeKey="eebus"
 		endpoint="/config/eebus"
 		@changed="$emit('changed')"
 	/>

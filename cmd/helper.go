@@ -1,13 +1,11 @@
 package cmd
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net"
 	"os"
 	"regexp"
-	"slices"
 	"strings"
 
 	"github.com/evcc-io/evcc/cmd/shutdown"
@@ -47,37 +45,20 @@ func unwrap(err error) (res []string) {
 	return
 }
 
-var redactSecrets = []string{
-	"mac",                   // infrastructure
-	"sponsortoken", "plant", // global settings
-	"apikey", "user", "password", "pin", // users
-	"token", "access", "refresh", "accesstoken", "refreshtoken", // tokens, including template variations
-	"ain", "secret", "serial", "deviceid", "machineid", "idtag", // devices
-	"app", "chats", "recipients", // push messaging
-	"vin", // vehicles
-}
-
 // redact redacts a configuration string
 func redact(src string) string {
+	secrets := []string{
+		"mac",                   // infrastructure
+		"sponsortoken", "plant", // global settings
+		"user", "password", "pin", // users
+		"token", "access", "refresh", "accesstoken", "refreshtoken", // tokens, including template variations
+		"ain", "secret", "serial", "deviceid", "machineid", "idtag", // devices
+		"app", "chats", "recipients", // push messaging
+		"vin", // vehicles
+	}
 	return regexp.
-		MustCompile(fmt.Sprintf(`(?i)\b(%s)\b.*?:.*`, strings.Join(redactSecrets, "|"))).
+		MustCompile(fmt.Sprintf(`(?i)\b(%s)\b.*?:.*`, strings.Join(secrets, "|"))).
 		ReplaceAllString(src, "$1: *****")
-}
-
-func redactJson(src string) string {
-	var j map[string]any
-	if err := json.Unmarshal([]byte(src), &j); err != nil {
-		panic(err)
-	}
-
-	for k := range j {
-		if slices.Contains(redactSecrets, k) {
-			j[k] = "*****"
-		}
-	}
-
-	res, _ := json.Marshal(j)
-	return string(res)
 }
 
 // fatal logs a fatal error and runs shutdown functions before terminating

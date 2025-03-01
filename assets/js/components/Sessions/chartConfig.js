@@ -40,7 +40,6 @@ export const commonOptions = {
   maintainAspectRatio: false,
   plugins: {
     legend: { display: false },
-    datalabels: { display: false },
     tooltip: {
       backgroundColor: "#000000cc",
       boxPadding: 5,

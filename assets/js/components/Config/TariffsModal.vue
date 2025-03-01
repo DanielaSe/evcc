@@ -5,7 +5,6 @@
 		:description="$t('config.tariffs.description')"
 		docs="/docs/reference/configuration/tariffs"
 		:defaultYaml="defaultYaml"
-		removeKey="tariffs"
 		endpoint="/config/tariffs"
 		data-testid="tariffs-modal"
 		@changed="$emit('changed')"

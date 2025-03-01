@@ -44,10 +44,6 @@ func trimLines(s string) string {
 	return strings.Join(lines, "\n")
 }
 
-func unquote(s string) string {
-	return strings.Trim(s, `"'`)
-}
-
 // FuncMap returns a sprig template.FuncMap with additional include function
 func FuncMap(tmpl *template.Template) *template.Template {
 	funcMap := template.FuncMap{
@@ -61,7 +57,6 @@ func FuncMap(tmpl *template.Template) *template.Template {
 			return buf.String(), nil
 		},
 		"urlEncode": url.QueryEscape,
-		"unquote":   unquote,
 	}
 
 	return tmpl.Funcs(sprig.FuncMap()).Funcs(funcMap)

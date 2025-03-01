@@ -13,22 +13,15 @@ type Tariffs struct {
 	Grid, FeedIn, Co2, Planner, Solar api.Tariff
 }
 
-// At returns the rate at the given time
-func At(t api.Tariff, ts time.Time) (api.Rate, error) {
+func Now(t api.Tariff) (float64, error) {
 	if t != nil {
 		if rr, err := t.Rates(); err == nil {
-			if r, err := rr.At(ts); err == nil {
-				return r, nil
+			if r, err := rr.Current(time.Now()); err == nil {
+				return r.Price, nil
 			}
 		}
 	}
-	return api.Rate{}, api.ErrNotAvailable
-}
-
-// Now returns the price/cost/value at the given time
-func Now(t api.Tariff) (float64, error) {
-	r, err := At(t, time.Now())
-	return r.Price, err
+	return 0, api.ErrNotAvailable
 }
 
 func Forecast(t api.Tariff) api.Rates {

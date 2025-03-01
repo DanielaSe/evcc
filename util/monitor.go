@@ -4,14 +4,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/benbjohnson/clock"
 	"github.com/evcc-io/evcc/api"
 )
 
 // Monitor monitors values for regular updates
 type Monitor[T any] struct {
 	val     T
-	clock   clock.Clock
 	mu      sync.RWMutex
 	once    sync.Once
 	done    chan struct{}
@@ -21,18 +19,10 @@ type Monitor[T any] struct {
 
 // NewMonitor created a new monitor with given timeout
 func NewMonitor[T any](timeout time.Duration) *Monitor[T] {
-	res := &Monitor[T]{
-		clock:   clock.New(),
+	return &Monitor[T]{
 		done:    make(chan struct{}),
 		timeout: timeout,
 	}
-
-	return res
-}
-
-// WithClock sets the a clock for debugging
-func (m *Monitor[T]) WithClock(clock clock.Clock) {
-	m.clock = clock
 }
 
 // Set updates the current value and timestamp
@@ -46,7 +36,7 @@ func (m *Monitor[T]) SetFunc(set func(T) T) {
 	defer m.mu.Unlock()
 
 	m.val = set(m.val)
-	m.updated = m.clock.Now()
+	m.updated = time.Now()
 
 	m.once.Do(func() { close(m.done) })
 }
@@ -76,7 +66,7 @@ func (m *Monitor[T]) GetFunc(get func(T)) error {
 		}
 	}
 
-	if m.clock.Since(m.updated) > m.timeout {
+	if time.Since(m.updated) > m.timeout {
 		err := api.ErrOutdated
 
 		// wait once on very first call
@@ -93,7 +83,7 @@ func (m *Monitor[T]) GetFunc(get func(T)) error {
 			case <-m.done:
 				// got value and updated timestamp
 				err = nil
-			case <-m.clock.After(m.timeout):
+			case <-time.After(m.timeout):
 			}
 
 			m.mu.RLock()

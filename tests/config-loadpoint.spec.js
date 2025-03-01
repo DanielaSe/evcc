@@ -89,7 +89,6 @@ test.describe("loadpoint", async () => {
 
     // update loadpoint title
     await page.getByTestId("loadpoint").getByRole("button", { name: "edit" }).click();
-    await expect(lpModal).toBeVisible();
     await lpModal.getByLabel("Title").fill("Solar Carport 2");
     await lpModal.getByRole("button", { name: "Save" }).click();
     await expect(page.getByTestId("loadpoint")).toContainText("Solar Carport 2");
@@ -102,7 +101,6 @@ test.describe("loadpoint", async () => {
 
     // update loadpoint power
     await page.getByTestId("loadpoint").getByRole("button", { name: "edit" }).click();
-    await expect(lpModal).toBeVisible();
     await lpModal.getByTestId("chargerPower-22kw").click();
     await lpModal.getByRole("button", { name: "Save" }).click();
     await expect(lpModal).not.toBeVisible();
@@ -112,14 +110,12 @@ test.describe("loadpoint", async () => {
     await page.reload();
     await expect(page.getByTestId("loadpoint")).toHaveCount(1);
     await page.getByTestId("loadpoint").getByRole("button", { name: "edit" }).click();
-    await expect(lpModal).toBeVisible();
     await expect(lpModal.getByTestId("chargerPower-22kw")).toHaveClass(/active/);
     await expect(lpModal.getByLabel("Title")).toHaveValue("Solar Carport 2");
     await lpModal.getByRole("button", { name: "Close" }).click();
 
     // delete loadpoint
     await page.getByTestId("loadpoint").getByRole("button", { name: "edit" }).click();
-    await expect(lpModal).toBeVisible();
     await lpModal.getByRole("button", { name: "Delete" }).click();
     await expect(page.getByTestId("loadpoint")).toHaveCount(0);
 
@@ -165,7 +161,6 @@ test.describe("loadpoint", async () => {
 
     // check priorities
     await page.getByTestId("loadpoint").nth(1).getByRole("button", { name: "edit" }).click();
-    await expect(lpModal).toBeVisible();
     await expect(lpModal.getByLabel("Priority")).toHaveValue("1");
   });
 
@@ -190,7 +185,6 @@ test.describe("loadpoint", async () => {
 
     // edit loadpoint
     await page.getByTestId("loadpoint").nth(0).getByRole("button", { name: "edit" }).click();
-    await expect(lpModal).toBeVisible();
     await expect(lpModal).toContainText("No vehicles are configured.");
     await lpModal.getByRole("button", { name: "Close" }).click();
 
@@ -219,7 +213,6 @@ test.describe("loadpoint", async () => {
     // check loadpoint default vehicles
     for (const [index, vehicle] of [VEHICLE_1, VEHICLE_2].entries()) {
       await page.getByTestId("loadpoint").nth(index).getByRole("button", { name: "edit" }).click();
-      await expect(lpModal).toBeVisible();
       await expect(lpModal.locator("#loadpointParamVehicle option:checked")).toHaveText(vehicle);
       await lpModal.getByRole("button", { name: "Close" }).click();
       await expect(lpModal).not.toBeVisible();

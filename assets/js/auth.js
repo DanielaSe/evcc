@@ -7,8 +7,7 @@ import { isSystemError } from "./utils/fatal";
 const auth = reactive({
   configured: true,
   loggedIn: null, // true / false / null (unknown)
-  nextUrl: null, // url to navigate to after login
-  nextModal: null, // modal instance to show after login
+  nextUrl: null,
 });
 
 export async function updateAuthStatus() {
@@ -65,15 +64,8 @@ export function getAndClearNextUrl() {
   return nextUrl;
 }
 
-export function getAndClearNextModal() {
-  const nextModal = auth.nextModal;
-  auth.nextModal = null;
-  return nextModal;
-}
-
-export function openLoginModal(nextUrl = null, nextModal = null) {
+export function openLoginModal(nextUrl = null) {
   auth.nextUrl = nextUrl;
-  auth.nextModal = nextModal;
   const modal = Modal.getOrCreateInstance(document.getElementById("loginModal"));
   modal.show();
 }

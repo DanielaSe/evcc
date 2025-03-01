@@ -117,10 +117,6 @@ func (v *Identity) RefreshToken(token *oauth2.Token) (*oauth2.Token, error) {
 		return nil, err
 	}
 
-	if res.RefreshToken == "" {
-		res.RefreshToken = token.RefreshToken
-	}
-
 	tok := util.TokenWithExpiry(&res)
 	v.TokenSource = oauth.RefreshTokenSource(tok, v)
 

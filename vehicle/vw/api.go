@@ -1,7 +1,6 @@
 package vw
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -100,7 +99,7 @@ func (v *API) Status(vin string) (StatusResponse, error) {
 		err = v.DoJSON(req, &res)
 	}
 
-	if se := new(request.StatusError); errors.As(err, &se) {
+	if _, ok := err.(request.StatusError); ok {
 		var rr RolesRights
 		rr, err = v.RolesRights(vin)
 

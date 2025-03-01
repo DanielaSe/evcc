@@ -1,7 +1,6 @@
 package meter
 
 import (
-	"context"
 	"errors"
 	"time"
 
@@ -24,11 +23,11 @@ type EEBus struct {
 }
 
 func init() {
-	registry.AddCtx("eebus", NewEEBusFromConfig)
+	registry.Add("eebus", NewEEBusFromConfig)
 }
 
 // New creates an EEBus HEMS from generic config
-func NewEEBusFromConfig(ctx context.Context, other map[string]interface{}) (api.Meter, error) {
+func NewEEBusFromConfig(other map[string]interface{}) (api.Meter, error) {
 	cc := struct {
 		Ski     string
 		Ip      string
@@ -41,11 +40,11 @@ func NewEEBusFromConfig(ctx context.Context, other map[string]interface{}) (api.
 		return nil, err
 	}
 
-	return NewEEBus(ctx, cc.Ski, cc.Ip, cc.Timeout)
+	return NewEEBus(cc.Ski, cc.Ip, cc.Timeout)
 }
 
 // NewEEBus creates EEBus charger
-func NewEEBus(ctx context.Context, ski, ip string, timeout time.Duration) (*EEBus, error) {
+func NewEEBus(ski, ip string, timeout time.Duration) (*EEBus, error) {
 	if eebus.Instance == nil {
 		return nil, errors.New("eebus not configured")
 	}
@@ -64,7 +63,7 @@ func NewEEBus(ctx context.Context, ski, ip string, timeout time.Duration) (*EEBu
 		return nil, err
 	}
 
-	if err := c.Wait(ctx); err != nil {
+	if err := c.Wait(90 * time.Second); err != nil {
 		return c, err
 	}
 

@@ -208,7 +208,7 @@ func (h *ModbusHandler) Test(log *util.Logger, in ResultDetails) (res []ResultDe
 		}
 
 		if ok {
-			out := in
+			out := in.Clone()
 			out.ModbusResult = &mr
 			res = append(res, out)
 		}

@@ -15,10 +15,9 @@ const colors = reactive({
   grid: null,
   co2PerKWh: null,
   pricePerKWh: null,
-  price: null,
-  co2: null,
+  price: "#FF912FFF",
+  co2: "#00916EFF",
   background: null,
-  light: null,
   selfPalette: ["#0FDE41FF", "#FFBD2FFF", "#FD6158FF", "#03C1EFFF", "#0F662DFF", "#FF922EFF"],
   palette: [
     "#03C1EFFF",
@@ -36,18 +35,6 @@ const colors = reactive({
   ],
 });
 
-export const dimColor = (color) => {
-  return color.toLowerCase().replace(/ff$/, "20");
-};
-
-export const lighterColor = (color) => {
-  return color.toLowerCase().replace(/ff$/, "aa");
-};
-
-export const fullColor = (color) => {
-  return color.toLowerCase().replace(/20$/, "ff");
-};
-
 function updateCssColors() {
   const style = window.getComputedStyle(document.documentElement);
   colors.text = style.getPropertyValue("--evcc-default-text");
@@ -55,21 +42,22 @@ function updateCssColors() {
   colors.border = style.getPropertyValue("--bs-border-color-translucent");
   colors.self = style.getPropertyValue("--evcc-self");
   colors.grid = style.getPropertyValue("--evcc-grid");
-  colors.price = style.getPropertyValue("--evcc-price");
-  colors.co2 = style.getPropertyValue("--evcc-co2");
   colors.background = style.getPropertyValue("--evcc-background");
   colors.pricePerKWh = style.getPropertyValue("--bs-gray-medium");
   colors.co2PerKWh = style.getPropertyValue("--bs-gray-medium");
-  colors.light = style.getPropertyValue("--bs-gray-light");
 }
 
 // update colors on theme change
 const darkModeMatcher = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
-if (darkModeMatcher && darkModeMatcher.addEventListener) {
-  darkModeMatcher.addEventListener("change", updateCssColors);
-}
-// initialize colors
+darkModeMatcher?.addEventListener("change", updateCssColors);
 updateCssColors();
-window.requestAnimationFrame(updateCssColors);
+
+export const dimColor = (color) => {
+  return color.toLowerCase().replace(/ff$/, "20");
+};
+
+export const fullColor = (color) => {
+  return color.toLowerCase().replace(/20$/, "ff");
+};
 
 export default colors;
